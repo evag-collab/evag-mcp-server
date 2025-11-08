@@ -51,6 +51,8 @@ global.fetch = async (input, init = {}) => {
   ...init,
   headers: Object.fromEntries(headers.entries()),
 });
+  console.log("[DEBUG] TOKEN VALUE =", JSON.stringify(process.env.EVAG_MCP_TEST_API_KEY || null));
+
   return originalFetch(input, { ...init, headers });
 };
 // --- End global auth injection ---
