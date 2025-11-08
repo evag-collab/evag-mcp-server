@@ -33,25 +33,27 @@ const originalFetch = global.fetch;
 
 global.fetch = async function (input, init = {}) {
   const headers = new Headers(init.headers || {});
-  const token = process.env.EVAG_MCP_TEST_API_KEY;
+  const token = process.env.EVAG_MCP_TEST_API_KEY?.trim();
 
-  // extra debug to confirm what Node sees
   console.log("[DEBUG] token typeof:", typeof token, "length:", token?.length);
   console.log("[DEBUG] token preview:", token ? token.slice(0, 15) + "..." : "undefined");
 
-  // Make absolutely sure token exists and is not empty
-  if (token && token.trim().length > 0 && !headers.has("x-authorization")) {
-    const headerValue = `Bearer ${token.trim()}`;
+  // ✅ Always overwrite x-authorization header, regardless of what the tool provided
+  if (token && token.length > 0) {
+    const headerValue = `Bearer ${token}`;
     headers.set("x-authorization", headerValue);
     console.log("[DEBUG] Applied header:", headerValue.slice(0, 40) + "...");
   } else {
-    console.warn("[WARN] Token missing or empty, header not applied");
+    console.warn("[WARN] Token missing or empty, using placeholder Bearer only");
+    headers.set("x-authorization", "Bearer");
   }
 
+  // API requires this for AJAX-style requests
   if (!headers.has("x-requested-with")) {
     headers.set("x-requested-with", "XMLHttpRequest");
   }
 
+  // Default content type for JSON bodies
   if (!headers.has("content-type")) {
     headers.set("content-type", "application/json");
   }
@@ -67,6 +69,7 @@ global.fetch = async function (input, init = {}) {
   }
 };
 // --- End global auth injection ---
+
 
 
 
