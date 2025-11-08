@@ -24,26 +24,25 @@ dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 
 // --- Global auth injection for ALL fetch calls ---
-// Place right after dotenv.config(...)
-
-const originalFetch = global.fetch; // Node 18+ has global fetch
+const originalFetch = global.fetch;
 const TOKEN_ENV = process.env.EVAG_MCP_TEST_API_KEY;
-
-// Your API expects "X-Authorization: Bearer <token>"
-const AUTH_HEADER_NAME = "X-Authorization";
-const AUTH_SCHEME = "Bearer";
 
 global.fetch = async (input, init = {}) => {
   const headers = new Headers(init.headers || {});
 
-  // only add header if the request doesn't already have it
-  if (TOKEN_ENV && !headers.has(AUTH_HEADER_NAME)) {
-    headers.set(AUTH_HEADER_NAME, `${AUTH_SCHEME} ${TOKEN_ENV}`);
+  // Force exact header names & values expected by the API
+  if (TOKEN_ENV && !headers.has("x-authorization")) {
+    headers.set("x-authorization", `Bearer ${TOKEN_ENV}`);
   }
 
-  // Add JSON Content-Type if missing
-  if (init.body && !headers.has("Content-Type") && typeof init.body === "string") {
-    headers.set("Content-Type", "application/json");
+  // API requires this for AJAX-style requests
+  if (!headers.has("x-requested-with")) {
+    headers.set("x-requested-with", "XMLHttpRequest");
+  }
+
+  // Default content type for JSON bodies
+  if (!headers.has("content-type")) {
+    headers.set("content-type", "application/json");
   }
   console.log('[DEBUG] Fetching', input, {
   ...init,
@@ -52,6 +51,10 @@ global.fetch = async (input, init = {}) => {
   return originalFetch(input, { ...init, headers });
 };
 // --- End global auth injection ---
+
+
+
+
 
 
 
