@@ -27,15 +27,25 @@ dotenv.config({ path: path.resolve(__dirname, ".env") });
 console.log("[DEBUG] EVAG_MCP_TEST_API_KEY =", process.env.EVAG_MCP_TEST_API_KEY ? "Loaded ✅" : "Missing ❌");
 
 
+
 // --- Global auth injection for ALL fetch calls ---
 const originalFetch = global.fetch;
 
 global.fetch = async function (input, init = {}) {
   const headers = new Headers(init.headers || {});
-  const token = process.env.EVAG_MCP_TEST_API_KEY; // read directly each time
+  const token = process.env.EVAG_MCP_TEST_API_KEY;
 
-  if (token && !headers.has("x-authorization")) {
-    headers.set("x-authorization", `Bearer ${token}`);
+  // extra debug to confirm what Node sees
+  console.log("[DEBUG] token typeof:", typeof token, "length:", token?.length);
+  console.log("[DEBUG] token preview:", token ? token.slice(0, 15) + "..." : "undefined");
+
+  // Make absolutely sure token exists and is not empty
+  if (token && token.trim().length > 0 && !headers.has("x-authorization")) {
+    const headerValue = `Bearer ${token.trim()}`;
+    headers.set("x-authorization", headerValue);
+    console.log("[DEBUG] Applied header:", headerValue.slice(0, 40) + "...");
+  } else {
+    console.warn("[WARN] Token missing or empty, header not applied");
   }
 
   if (!headers.has("x-requested-with")) {
@@ -46,19 +56,15 @@ global.fetch = async function (input, init = {}) {
     headers.set("content-type", "application/json");
   }
 
-    console.log('[DEBUG] Fetching', input, {
-  ...init,
-  headers: Object.fromEntries(headers.entries()),
-});
-  console.log("[DEBUG] TOKEN VALUE =", JSON.stringify(process.env.EVAG_MCP_TEST_API_KEY || null));
-  
-  console.log("[DEBUG] Fetching", input, {
-    ...init,
-    headers: Object.fromEntries(headers.entries()),
-  });
+  console.log("[DEBUG] Final headers:", Object.fromEntries(headers.entries()));
 
-  // IMPORTANT: always return inside the async function
-  return originalFetch(input, { ...init, headers });
+  try {
+    const response = await originalFetch(input, { ...init, headers });
+    return response;
+  } catch (err) {
+    console.error("[ERROR] Fetch failed:", err);
+    throw err;
+  }
 };
 // --- End global auth injection ---
 
