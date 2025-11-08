@@ -8,7 +8,7 @@
 const executeFunction = async () => {
   const url = 'https://simforthings-dev.bics.com/api/GetTimeZone';
   // const authKey = ''; // will be provided by the user
-const authKey = process.env.authKey || ''; // will be provided by Postman environment
+
 console.log('Auth header:', `Bearer ${authKey}`);
   try {
     // Set up headers for the request
