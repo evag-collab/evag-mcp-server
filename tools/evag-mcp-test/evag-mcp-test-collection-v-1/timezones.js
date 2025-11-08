@@ -3,6 +3,7 @@
  *
  * @returns {Promise<Object>} - The response containing time zone details.
  */
+import { Tool } from '@postman/mcp-server';
 
 const executeFunction = async () => {
   const url = 'https://simforthings-dev.bics.com/api/GetTimeZone';
