@@ -32,11 +32,28 @@ const TOKEN_ENV = process.env.EVAG_MCP_TEST_API_KEY;
 
 global.fetch = async (input, init = {}) => {
   const headers = new Headers(init.headers || {});
+  const token = process.env.EVAG_MCP_TEST_API_KEY; // read fresh every call
 
-  // Force exact header names & values expected by the API
-  if (TOKEN_ENV && !headers.has("x-authorization")) {
-    headers.set("x-authorization", `Bearer ${TOKEN_ENV}`);
+  if (token && !headers.has("x-authorization")) {
+    headers.set("x-authorization", `Bearer ${token}`);
   }
+
+  if (!headers.has("x-requested-with")) {
+    headers.set("x-requested-with", "XMLHttpRequest");
+  }
+
+  if (!headers.has("content-type")) {
+    headers.set("content-type", "application/json");
+  }
+
+  console.log("[DEBUG] Fetching", input, {
+    ...init,
+    headers: Object.fromEntries(headers.entries()),
+  });
+
+  return globalThis.fetch(input, { ...init, headers });
+};
+
 
   // API requires this for AJAX-style requests
   if (!headers.has("x-requested-with")) {
