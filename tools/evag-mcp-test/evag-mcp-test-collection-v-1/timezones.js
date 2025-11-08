@@ -3,6 +3,7 @@
  *
  * @returns {Promise<Object>} - The response containing time zone details.
  */
+console.log('Auth header:', `Bearer ${authKey}`);
 const executeFunction = async () => {
   const url = 'https://simforthings-dev.bics.com/api/GetTimeZone';
   const authKey = ''; // will be provided by the user
