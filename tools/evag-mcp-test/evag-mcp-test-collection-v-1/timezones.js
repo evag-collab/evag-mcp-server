@@ -7,7 +7,7 @@
 
 const executeFunction = async () => {
   const url = 'https://simforthings-dev.bics.com/api/GetTimeZone';
-  const authKey = ''; // will be provided by the user
+  const authKey = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJldmxhc3Npc2ZhaWwiLCJhdWQiOiJBQ0NFU1MiLCJpc3MiOiIxMDAwMDAiLCJpYXQiOjE3NjI2MTQwODQsImV4cCI6MTc2MjY2NDQ4NH0.9qaGGuVt-oLRfwxRvTv1dVhGOSAwR3Y9p4Y7lZbF-KftZyoczMNnfcfMAoyv2AA7jUgMKw99H8vHBYyyfmzYyg'; // will be provided by the user
 
 console.log('Auth header:', `Bearer ${authKey}`);
   try {
