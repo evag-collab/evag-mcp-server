@@ -26,13 +26,13 @@ dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 console.log("[DEBUG] EVAG_MCP_TEST_API_KEY =", process.env.EVAG_MCP_TEST_API_KEY ? "Loaded ✅" : "Missing ❌");
 
+
 // --- Global auth injection for ALL fetch calls ---
 const originalFetch = global.fetch;
-const TOKEN_ENV = process.env.EVAG_MCP_TEST_API_KEY;
 
-global.fetch = async (input, init = {}) => {
+global.fetch = async function (input, init = {}) {
   const headers = new Headers(init.headers || {});
-  const token = process.env.EVAG_MCP_TEST_API_KEY; // read fresh every call
+  const token = process.env.EVAG_MCP_TEST_API_KEY; // read directly each time
 
   if (token && !headers.has("x-authorization")) {
     headers.set("x-authorization", `Bearer ${token}`);
@@ -46,30 +46,18 @@ global.fetch = async (input, init = {}) => {
     headers.set("content-type", "application/json");
   }
 
+    console.log('[DEBUG] Fetching', input, {
+  ...init,
+  headers: Object.fromEntries(headers.entries()),
+});
+  console.log("[DEBUG] TOKEN VALUE =", JSON.stringify(process.env.EVAG_MCP_TEST_API_KEY || null));
+  
   console.log("[DEBUG] Fetching", input, {
     ...init,
     headers: Object.fromEntries(headers.entries()),
   });
 
-  return globalThis.fetch(input, { ...init, headers });
-};
-
-
-  // API requires this for AJAX-style requests
-  if (!headers.has("x-requested-with")) {
-    headers.set("x-requested-with", "XMLHttpRequest");
-  }
-
-  // Default content type for JSON bodies
-  if (!headers.has("content-type")) {
-    headers.set("content-type", "application/json");
-  }
-  console.log('[DEBUG] Fetching', input, {
-  ...init,
-  headers: Object.fromEntries(headers.entries()),
-});
-  console.log("[DEBUG] TOKEN VALUE =", JSON.stringify(process.env.EVAG_MCP_TEST_API_KEY || null));
-
+  // IMPORTANT: always return inside the async function
   return originalFetch(input, { ...init, headers });
 };
 // --- End global auth injection ---
