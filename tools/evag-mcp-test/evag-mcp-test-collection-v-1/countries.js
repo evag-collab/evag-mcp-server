@@ -7,7 +7,7 @@
  */
 const executeFunction = async ({ countryISO3 }) => {
   const url = 'https://simforthings-dev.bics.com/api/GetCountries';
-  const authKey = ''; // will be provided by the user
+  const authKey = process.env.EVAG_MCP_TEST_API_KEY; // will be provided by the user
   try {
     // Set up headers for the request
     const headers = {
