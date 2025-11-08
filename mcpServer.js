@@ -23,6 +23,9 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 
+
+console.log("[DEBUG] EVAG_MCP_TEST_API_KEY =", process.env.EVAG_MCP_TEST_API_KEY ? "Loaded ✅" : "Missing ❌");
+
 // --- Global auth injection for ALL fetch calls ---
 const originalFetch = global.fetch;
 const TOKEN_ENV = process.env.EVAG_MCP_TEST_API_KEY;
