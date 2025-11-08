@@ -45,7 +45,10 @@ global.fetch = async (input, init = {}) => {
   if (init.body && !headers.has("Content-Type") && typeof init.body === "string") {
     headers.set("Content-Type", "application/json");
   }
-
+  console.log('[DEBUG] Fetching', input, {
+  ...init,
+  headers: Object.fromEntries(headers.entries()),
+});
   return originalFetch(input, { ...init, headers });
 };
 // --- End global auth injection ---
