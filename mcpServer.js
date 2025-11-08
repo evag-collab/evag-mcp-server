@@ -24,34 +24,24 @@ dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 
 // --- Global auth injection for ALL fetch calls ---
-// Place this right after dotenv.config(...) and BEFORE tools are discovered.
+// Place right after dotenv.config(...)
 
 const originalFetch = global.fetch; // Node 18+ has global fetch
-
 const TOKEN_ENV = process.env.EVAG_MCP_TEST_API_KEY;
 
-// Optional: customize header name/scheme via env
-// If your API expects "Authorization: Bearer <token>":
-//  - leave defaults (name=Authorization, scheme=Bearer)
-// If it expects "authKey: <token>":
-//  - set MCP_AUTH_HEADER_NAME=authKey and MCP_AUTH_SCHEME="" (empty) in your env
-const AUTH_HEADER_NAME = process.env.MCP_AUTH_HEADER_NAME || "Authorization";
-const AUTH_SCHEME = Object.prototype.hasOwnProperty.call(process.env, "MCP_AUTH_SCHEME")
-  ? process.env.MCP_AUTH_SCHEME                  // allow empty string to mean "no scheme"
-  : "Bearer";
+// Your API expects "X-Authorization: Bearer <token>"
+const AUTH_HEADER_NAME = "X-Authorization";
+const AUTH_SCHEME = "Bearer";
 
 global.fetch = async (input, init = {}) => {
   const headers = new Headers(init.headers || {});
 
-  // Only set if caller didn't already provide it
+  // only add header if the request doesn't already have it
   if (TOKEN_ENV && !headers.has(AUTH_HEADER_NAME)) {
-    const value = (AUTH_SCHEME && AUTH_SCHEME.length > 0)
-      ? `${AUTH_SCHEME} ${TOKEN_ENV}`
-      : `${TOKEN_ENV}`;
-    headers.set(AUTH_HEADER_NAME, value);
+    headers.set(AUTH_HEADER_NAME, `${AUTH_SCHEME} ${TOKEN_ENV}`);
   }
 
-  // Helpful default for JSON bodies if not already specified
+  // Add JSON Content-Type if missing
   if (init.body && !headers.has("Content-Type") && typeof init.body === "string") {
     headers.set("Content-Type", "application/json");
   }
